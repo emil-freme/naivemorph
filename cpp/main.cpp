@@ -1,7 +1,7 @@
 #include <iostream>
 #include  "baremorph.hpp" 
 
-using mm = Bare::Morph;
+namespace mm = Bare::Morph;
 
 int main(void){
 

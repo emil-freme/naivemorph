@@ -41,6 +41,68 @@ namespace Bare{
             //Uniform Quantization
             Img posterize(const Img &in, buint b);
 
+            Img translate(const Img &in, int dx, int dy);
+
+            Img rotate(const Img &in, int e);
+
+            //TODO: Interpolação
+            Img scale(const Img &in, float sx, float sy);
+
+            Img shear(const Img &in, float sx, float sy);
+
+            Img warpAffine(const Img &in, float a, float b, float tx, 
+                          float c, float d, float ty);
+
+            //Definir parametros
+            Img perspective_transform();
+
+            //Add Saturação constante
+            Img addm(const Img &in, float a);
+
+            Img blend(const Img &in1, const Img &in2, float alpha); 
+
+            Img neg(const Img &in);
+            Img bnot(const Img &in);
+
+            Img equalize(const Img &in, int b);
+            Img hist(const Img &in, int b);
+
+            //Bitwise and
+            Img band(const Img &in, const Img &mask);
+
+            Img blur0(const Img &in, int n);
+
+            Img lapacian0();
+
+            Img sobel0();
+
+            Img median0();
+
+            Img usm0();
+
+            //Usar Limiarização de Otsu
+            Img threshold(const Img &in);
+            //Limiarização binária
+            Img threshold(const Img &in, int l);
+
+            //Dilatação
+            Img dil0();
+
+            Img dil1();
+
+            Img ero0();
+            Img ero1();
+
+            Img open0();
+
+            Img close0();
+
+            Img tophat0();
+
+            Img blackhat();
+
+
+
             void printImg(Img &img);
     
     };
