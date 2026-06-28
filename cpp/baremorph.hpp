@@ -1,3 +1,7 @@
+
+#ifndef BARE_MORPH_INCLUDE_H
+#define BARE_MORPH_INCLUDE_H
+
 #include <cmath>
 #include <cstdint>
 #include <vector>
@@ -6,6 +10,7 @@ namespace Bare{
 
     using buint = uint8_t;
     using Img_data =  std::vector<buint>;
+    using SE_data = std::vector<int>;
 
     class Img{
         public:
@@ -17,6 +22,18 @@ namespace Bare{
 
         buint& operator[](size_t i, size_t j);
         buint operator[](size_t i, size_t j) const;
+    };
+
+    class SElem{
+        public:
+        buint width; 
+        buint height; 
+        SE_data data;
+
+        SElem(buint w, buint h);
+
+        int& operator[](size_t i, size_t j);
+        int operator[](size_t i, size_t j) const;
     };
 
     namespace Metrics{
@@ -33,6 +50,8 @@ namespace Bare{
 
             //mm.readImg() TODO: Better image data structure
             Img readImg(buint w, buint h);
+
+            Img readElem(buint w, buint h);
 
             Img contrastAndBrightnessAdjust(const Img &in, float a, buint b);
 
@@ -86,11 +105,11 @@ namespace Bare{
             Img threshold(const Img &in, int l);
 
             //Dilatação
-            Img dil0();
+            Img dil0(Img &in, SElem &se);
 
             Img dil1();
 
-            Img ero0();
+            Img ero0(Img &in, SElem &se);
             Img ero1();
 
             Img open0();
@@ -104,7 +123,209 @@ namespace Bare{
 
 
             void printImg(Img &img);
+            void printSE(SElem &se);
     
     };
 
 }
+
+#endif //BARE_MORPH_INCLUDE_H
+
+#ifdef BARE_MORPH_IMPLEMENTATION
+
+#include <iostream>
+#include <algorithm>
+
+namespace Bare{
+
+    Img::Img(buint w, buint h){
+
+        width = w;
+        height = h; 
+        data = Img_data(w*h, 0);
+    }
+
+    buint& Img::operator[](size_t i, size_t j){
+        
+        return data[i * width + j];
+    }
+
+    buint Img::operator[](size_t i, size_t j) const {
+
+        return data[i * width + j];
+    }
+
+    SElem::SElem(buint w, buint h){
+
+        width = w;
+        height = h; 
+        data = SE_data(w*h, 0);
+    }
+
+    int& SElem::operator[](size_t i, size_t j){
+        
+        return data[i * width + j];
+    }
+
+    int SElem::operator[](size_t i, size_t j) const {
+
+        return data[i * width + j];
+    }
+
+    Img Morph::readImg(buint w, buint h){
+
+        Img img(w, h);
+        int pixel; 
+        for(size_t i = 0; i < h; i++){
+            for(size_t j = 0; j < w; j++){
+                std::cin >> pixel;
+                
+                img[i, j] = pixel;
+            }
+        }
+        return img;
+    }
+
+    
+    Img Morph::readElem(buint w, buint h){
+
+        Img img(w, h);
+        int pixel; 
+        for(size_t i = 0; i < h; i++){
+            for(size_t j = 0; j < w; j++){
+                std::cin >> pixel;
+                
+                img[i, j] = pixel;
+            }
+        }
+        return img;
+    }
+
+    Img Morph::contrastAndBrightnessAdjust(const Img &in, float a, buint b){
+
+        Img out(in.width, in.height);
+        for(size_t i = 0; i < (in.width * in.height); i++){
+            int pixel = a * in.data[i] + b;
+            out.data[i] = std::clamp(pixel, 0, 255);
+        }
+        return out;
+    }
+
+    Img Morph::subsampling(const Img &in, buint f){
+
+        Img out(in.width / f, in.height / f);
+
+        for(size_t i = 0; i < out.height; i++){
+            for(size_t j = 0; j < out.width; j++){
+                out[i, j] = in[i*f, j*f];
+            }
+        }
+        return out;
+    }
+
+    Img Morph::posterize(const Img &in, buint b){
+
+        Img out(in.width, in.height);
+        int step = 256 / (1 << b); //pow (2, b)
+        for(int i = 0; i < in.width * in.height; i++){
+            out.data[i] = in.data[i]/step;
+        }
+        return out;
+    }
+
+
+    Img Morph::ero0(Img &in, SElem &se){
+
+        Img out(in.width, in.height);
+
+        for(size_t i = 0; i < in.height; i++){
+            for(size_t j = 0; j < in.width; j++){
+
+                std::vector<uint8_t> neight(se.width * se.height, 0);
+                //Deslisando o elemento estruturante
+                for(size_t si = 0; si < se.height; si++){
+                    for(size_t sj = 0; sj < se.width; sj++){
+                        
+                        //mapeamento para a imagem original
+                        int ii = i + si-se.height/2;
+                        int ij = j + sj-se.width/2;
+
+                        if( se[si, sj] == 0 ||
+                            ii < 0 || ii >= in.height ||
+                            ij < 0 || ij >= in.width 
+                            ){
+                            neight[si * se.width + sj] = 255;
+                            continue;
+                        }
+
+                        neight[si * se.width + sj] = in[ii, ij];
+
+                    }
+                }
+                out[i, j] = std::ranges::min(neight);
+
+            }
+        }
+        return out;
+    }
+
+    Img Morph::dil0(Img &in, SElem &se){
+
+        Img out(in.width, in.height);
+
+        for(size_t i = 0; i < in.height; i++){
+            for(size_t j = 0; j < in.width; j++){
+
+                std::vector<uint8_t> neight(se.width * se.height, 0);
+                //Deslisando o elemento estruturante
+                for(size_t si = 0; si < se.height; si++){
+                    for(size_t sj = 0; sj < se.width; sj++){
+                
+                        //mapeamento para a imagem original
+                        int ii = i + si-se.height/2;
+                        int ij = j + sj-se.width/2;
+
+                        if( se[si, sj] == 0 ||
+                            ii < 0 || ii >= in.height ||
+                            ij < 0 || ij >= in.width 
+                            ){
+                            neight[si * se.width + sj] = 0;
+                            continue;
+                        }
+
+                        neight[si * se.width + sj] = in[ii, ij];
+
+                    }
+                }
+                out[i, j] = std::ranges::max(neight);
+
+            }
+        }
+        return out;
+    }
+
+
+    void Morph::printImg(Img &img){
+
+        for(size_t i = 0; i < img.height; i++){
+            for(size_t j = 0; j < img.width; j++){
+                std::cout << +img[i, j] << " ";
+            }
+            std::cout << "\n";
+        }
+    }
+
+    void Morph::printSE(SElem &se){
+
+        for(size_t i = 0; i < se.height; i++){
+            for(size_t j = 0; j < se.width; j++){
+                std::cout << +se[i, j] << " ";
+            }
+            std::cout << "\n";
+        }
+    }
+
+}
+
+#endif
+
