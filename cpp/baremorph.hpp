@@ -32,6 +32,8 @@ namespace Bare{
 
         SElem(buint w, buint h);
 
+        SElem reflect();
+
         int& operator[](size_t i, size_t j);
         int operator[](size_t i, size_t j) const;
     };
@@ -107,14 +109,15 @@ namespace Bare{
             //Dilatação
             Img dil0(Img &in, SElem &se);
 
-            Img dil1();
+            Img dil1(Img &in, SElem &se);
 
             Img ero0(Img &in, SElem &se);
-            Img ero1();
 
-            Img open0();
+            Img ero1(Img &in, SElem &se);
 
-            Img close0();
+            Img open0(Img &in, SElem &se);
+
+            Img close0(Img &in, SElem &se);
 
             Img tophat0();
 
@@ -160,6 +163,22 @@ namespace Bare{
         width = w;
         height = h; 
         data = SE_data(w*h, 0);
+    }
+
+    SElem SElem::reflect(){
+        SElem reflected(width, height);
+
+        for(size_t i = 0; i < height; i++){
+            for(size_t j = 0; j < width; j++){
+               
+                int ri = height - 1 - i; 
+                int rj = width - 1 - j; 
+
+                reflected[ri, rj] = (*this)[i, j];
+
+            }
+        }
+        return reflected;
     }
 
     int& SElem::operator[](size_t i, size_t j){
@@ -269,31 +288,70 @@ namespace Bare{
         return out;
     }
 
-    Img Morph::dil0(Img &in, SElem &se){
+    Img Morph::ero1(Img &in, SElem &se){
 
         Img out(in.width, in.height);
 
         for(size_t i = 0; i < in.height; i++){
             for(size_t j = 0; j < in.width; j++){
 
-                std::vector<uint8_t> neight(se.width * se.height, 0);
+                std::vector<int> neight(se.width * se.height, 0);
                 //Deslisando o elemento estruturante
                 for(size_t si = 0; si < se.height; si++){
                     for(size_t sj = 0; sj < se.width; sj++){
-                
+                        
                         //mapeamento para a imagem original
                         int ii = i + si-se.height/2;
                         int ij = j + sj-se.width/2;
 
-                        if( se[si, sj] == 0 ||
-                            ii < 0 || ii >= in.height ||
+                        if( ii < 0 || ii >= in.height ||
                             ij < 0 || ij >= in.width 
                             ){
-                            neight[si * se.width + sj] = 0;
+                            neight[si * se.width + sj] = 255;
                             continue;
                         }
 
-                        neight[si * se.width + sj] = in[ii, ij];
+                        neight[si * se.width + sj] = in[ii, ij] - se[si, sj];
+
+                    }
+                }
+                out[i, j] = std::ranges::min(neight);
+
+            }
+        }
+        return out;
+    }
+
+    Img Morph::dil0(Img &in, SElem &se){
+
+        Img out(in.width, in.height);
+
+        SElem rse = se.reflect();
+
+        for(size_t i = 0; i < in.height; i++){
+            for(size_t j = 0; j < in.width; j++){
+
+                std::vector<uint8_t> neight(rse.width * rse.height, 0);
+                //Deslisando o elemento estruturante
+                for(size_t si = 0; si < rse.height; si++){
+                    for(size_t sj = 0; sj < rse.width; sj++){
+                
+                        //mapeamento para a imagem original
+                        int ii = i + si-rse.height/2;
+                        int ij = j + sj-rse.width/2;
+
+                        if( rse[si, sj] == 0 ||
+                            ii < 0 || ii >= in.height ||
+                            ij < 0 || ij >= in.width 
+                            ){
+                            //Aqui estou usando 0 por ele é minimo de uint8_t
+                            //caso fosse outro tipo deveria ser o minimo do
+                            //tipo.
+                            neight[si * rse.width + sj] = 0;
+                            continue;
+                        }
+
+                        neight[si * rse.width + sj] = in[ii, ij];
 
                     }
                 }
@@ -304,6 +362,56 @@ namespace Bare{
         return out;
     }
 
+    Img Morph::dil1(Img &in, SElem &se){
+
+        Img out(in.width, in.height);
+
+        // SElem rse = se.reflect(); Com SE ponderado não se reflete;
+
+        for(size_t i = 0; i < in.height; i++){
+            for(size_t j = 0; j < in.width; j++){
+
+                std::vector<int> neight(se.width * se.height, 0);
+                //Deslisando o elemento estruturante
+                for(size_t si = 0; si < se.height; si++){
+                    for(size_t sj = 0; sj < se.width; sj++){
+                
+                        //mapeamento para a imagem original
+                        int ii = i + si-se.height/2;
+                        int ij = j + sj-se.width/2;
+
+                        if( ii < 0 || ii >= in.height ||
+                            ij < 0 || ij >= in.width 
+                            ){
+                            //Aqui estou usando 0 por ele é minimo de uint8_t
+                            //caso fosse outro tipo deveria ser o minimo do
+                            //tipo.
+                            neight[si * se.width + sj] = 0;
+                            continue;
+                        }
+
+                        neight[si * se.width + sj] = in[ii, ij] + se[si, sj];
+
+                    }
+                }
+                out[i, j] = std::ranges::max(neight);
+
+            }
+        }
+        return out;
+    }
+
+
+    Img Morph::open0(Img &in, SElem &se){
+        Img ero = Morph::ero0(in, se);
+        return Morph::dil0(ero, se);
+    }
+
+
+    Img Morph::close0(Img &in, SElem &se){
+        Img dil = Morph::dil0(in, se);
+        return Morph::ero0(dil, se);
+    }
 
     void Morph::printImg(Img &img){
 

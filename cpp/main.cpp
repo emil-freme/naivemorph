@@ -23,19 +23,26 @@ int main(void){
     Bare::Img img = mm::readImg(width, height);
 
     Bare::SElem se(3,3);
+    se[0,0] = 0;
     se[0,1] = 1;
+    se[0,2] = 0;
     se[1,0] = 1;
-    se[1,1] = 1;
+    se[1,1] = 2;
     se[1,2] = 1;
+    se[2,0] = 0;
     se[2,1] = 1;
+    se[2,2] = 0;
 
     std::cout << "\n";
     mm::printSE(se);
     std::cout << "\n";
     // Img r = mm::contrastAndBrightnessAdjust(img, a, b);
-    Bare::Img r = mm::dil0(img, se);
+    Bare::Img r = mm::dil1(img, se);
     mm::printImg(r);
 
+    std::cout << "\n";
+    r = mm::ero1(img, se);
+    mm::printImg(r);
 
     return 0;
 }
