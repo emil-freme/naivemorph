@@ -32,7 +32,7 @@ namespace Bare{
 
         SElem(buint w, buint h);
 
-        SElem reflect();
+        SElem reflect() const;
 
         int& operator[](size_t i, size_t j);
         int operator[](size_t i, size_t j) const;
@@ -107,17 +107,17 @@ namespace Bare{
             Img threshold(const Img &in, int l);
 
             //Dilatação
-            Img dil0(Img &in, SElem &se);
+            Img dil0(const Img &in, const  SElem &se);
 
-            Img dil1(Img &in, SElem &se);
+            Img dil1(const Img &in, const  SElem &se);
 
-            Img ero0(Img &in, SElem &se);
+            Img ero0(const Img &in, const  SElem &se);
 
-            Img ero1(Img &in, SElem &se);
+            Img ero1(const Img &in, const  SElem &se);
 
-            Img open0(Img &in, SElem &se);
+            Img open0(const Img &in, const  SElem &se);
 
-            Img close0(Img &in, SElem &se);
+            Img close0(const Img &in, const  SElem &se);
 
             Img tophat0();
 
@@ -165,7 +165,7 @@ namespace Bare{
         data = SE_data(w*h, 0);
     }
 
-    SElem SElem::reflect(){
+    SElem SElem::reflect() const {
         SElem reflected(width, height);
 
         for(size_t i = 0; i < height; i++){
@@ -253,14 +253,14 @@ namespace Bare{
     }
 
 
-    Img Morph::ero0(Img &in, SElem &se){
+    Img Morph::ero0(const Img &in, const  SElem &se){
 
         Img out(in.width, in.height);
 
+        std::vector<uint8_t> neight(se.width * se.height, 0);
         for(size_t i = 0; i < in.height; i++){
             for(size_t j = 0; j < in.width; j++){
 
-                std::vector<uint8_t> neight(se.width * se.height, 0);
                 //Deslisando o elemento estruturante
                 for(size_t si = 0; si < se.height; si++){
                     for(size_t sj = 0; sj < se.width; sj++){
@@ -288,14 +288,14 @@ namespace Bare{
         return out;
     }
 
-    Img Morph::ero1(Img &in, SElem &se){
+    Img Morph::ero1(const Img &in, const  SElem &se){
 
         Img out(in.width, in.height);
 
+        std::vector<int> neight(se.width * se.height, 0);
         for(size_t i = 0; i < in.height; i++){
             for(size_t j = 0; j < in.width; j++){
 
-                std::vector<int> neight(se.width * se.height, 0);
                 //Deslisando o elemento estruturante
                 for(size_t si = 0; si < se.height; si++){
                     for(size_t sj = 0; sj < se.width; sj++){
@@ -322,16 +322,16 @@ namespace Bare{
         return out;
     }
 
-    Img Morph::dil0(Img &in, SElem &se){
+    Img Morph::dil0(const Img &in, const  SElem &se){
 
         Img out(in.width, in.height);
 
         SElem rse = se.reflect();
 
+        std::vector<uint8_t> neight(rse.width * rse.height, 0);
         for(size_t i = 0; i < in.height; i++){
             for(size_t j = 0; j < in.width; j++){
 
-                std::vector<uint8_t> neight(rse.width * rse.height, 0);
                 //Deslisando o elemento estruturante
                 for(size_t si = 0; si < rse.height; si++){
                     for(size_t sj = 0; sj < rse.width; sj++){
@@ -362,16 +362,16 @@ namespace Bare{
         return out;
     }
 
-    Img Morph::dil1(Img &in, SElem &se){
+    Img Morph::dil1(const Img &in, const  SElem &se){
 
         Img out(in.width, in.height);
 
         // SElem rse = se.reflect(); Com SE ponderado não se reflete;
 
+        std::vector<int> neight(se.width * se.height, 0);
         for(size_t i = 0; i < in.height; i++){
             for(size_t j = 0; j < in.width; j++){
 
-                std::vector<int> neight(se.width * se.height, 0);
                 //Deslisando o elemento estruturante
                 for(size_t si = 0; si < se.height; si++){
                     for(size_t sj = 0; sj < se.width; sj++){
@@ -402,15 +402,13 @@ namespace Bare{
     }
 
 
-    Img Morph::open0(Img &in, SElem &se){
-        Img ero = Morph::ero0(in, se);
-        return Morph::dil0(ero, se);
+    Img Morph::open0(const Img &in, const  SElem &se){
+        return Morph::dil0(Morph::ero0(in, se), se);
     }
 
 
-    Img Morph::close0(Img &in, SElem &se){
-        Img dil = Morph::dil0(in, se);
-        return Morph::ero0(dil, se);
+    Img Morph::close0(const Img &in, const  SElem &se){
+        return Morph::ero0(Morph::dil0(in,se), se);
     }
 
     void Morph::printImg(Img &img){
