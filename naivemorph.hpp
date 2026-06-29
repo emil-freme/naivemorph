@@ -22,8 +22,7 @@ public:
 
   buint &operator[](size_t i, size_t j);
   buint operator[](size_t i, size_t j) const;
-  Img operator-(
-      const Img &a) const; // Verificar se precisa ser para os mesmos tamanhos
+  Img operator-( const Img &a) const; 
   Img operator+(const Img &a) const;
 };
 
@@ -78,19 +77,24 @@ Img subsampling(const Img &in, buint f);
 // Uniform Quantization
 Img posterize(const Img &in, buint b);
 
+//TODO
 Img translate(const Img &in, int dx, int dy);
 
+//TODO
 Img rotate(const Img &in, int e);
 
 // TODO: Interpolação
 Img scale(const Img &in, float sx, float sy);
 
+//TODO
 Img shear(const Img &in, float sx, float sy);
 
+//TODO
 Img warpAffine(const Img &in, float a, float b, float tx, float c, float d,
                float ty);
 
-// Definir parametros
+
+//TODO// Definir parametros
 Img perspective_transform();
 
 // Add Saturação constante
@@ -123,17 +127,23 @@ Img hist(const Img &in, int b);
 // Bitwise and
 Img band(const Img &in, const Img &mask);
 
+//TODO
 Img blur0(const Img &in, int n);
 
+//TODO
 Img lapacian0();
 
+//TODO
 Img sobel0();
 
+//TODO
 Img median0();
 
+//TODO
 Img usm0();
 
-// Usar Limiarização de Otsu
+
+//TODO// Usar Limiarização de Otsu
 Img threshold(const Img &in);
 // Limiarização binária
 Img threshold(const Img &in, int l);
@@ -311,18 +321,18 @@ Img Morph::readImg(buint w, buint h) {
   return img;
 }
 
-Img Morph::readElem(buint w, buint h) {
+SElem Morph::readElem(buint w, buint h) {
 
-  Img img(w, h);
+  SElem se(w, h);
   int pixel;
   for (size_t i = 0; i < h; i++) {
     for (size_t j = 0; j < w; j++) {
       std::cin >> pixel;
 
-      img[i, j] = pixel;
+      se[i, j] = pixel;
     }
   }
-  return img;
+  return se;
 }
 
 Img Morph::contrastAndBrightnessAdjust(const Img &in, float a, buint b) {

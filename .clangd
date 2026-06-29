@@ -1,5 +1,5 @@
 CompileFlags:
-  Add: [-std=c++23, -DBARE_MORPH_IMPLEMENTATION, -Wno-odr]
+  Add: [-std=c++23, -DNAIVE_MORPH_IMPLEMENTATION, -Wno-odr]
 
 
 Diagnostics:
