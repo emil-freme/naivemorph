@@ -22,6 +22,8 @@ namespace Bare{
 
         buint& operator[](size_t i, size_t j);
         buint operator[](size_t i, size_t j) const;
+        Img operator-(Img &a);//Verificar se precisa ser para os mesmos tamanhos
+        Img operator+(Img &a);
     };
 
     class SElem{
@@ -119,9 +121,11 @@ namespace Bare{
 
             Img close0(const Img &in, const  SElem &se);
 
-            Img tophat0();
+            Img grad0(Img &a, SElem &Se);
 
-            Img blackhat();
+            Img tophat0(Img &a, SElem &se);
+
+            Img blackhat(Img &a, SElem &se);
 
 
 
@@ -138,6 +142,7 @@ namespace Bare{
 
 #include <iostream>
 #include <algorithm>
+#include <cassert>
 
 namespace Bare{
 
@@ -156,6 +161,40 @@ namespace Bare{
     buint Img::operator[](size_t i, size_t j) const {
 
         return data[i * width + j];
+    }
+
+    Img Img::operator-(Img &a){
+        assert( height == a.height &&
+                width == a.width &&
+                "Imagens devem ser de mesmo tamanho");
+
+        Img out(width, height);
+        for(int i = 0; i < height; i++){
+            for(int j = 0; j < width; j++){
+                //Solucionar problema de overflow e underflor
+                int px = (*this)[i,j] - a[i,j] ;
+                px = px < 255 ? px : 255;
+                out[i, j] = px > 0 ? px : 0; 
+            }
+        }
+        return out;
+    }
+
+    Img Img::operator+(Img &a){
+        assert( height == a.height &&
+                width == a.width &&
+                "Imagens devem ser de mesmo tamanho");
+
+        Img out(width, height);
+        for(int i = 0; i < height; i++){
+            for(int j = 0; j < width; j++){
+                //Solucionar problema de overflow e underflor
+                int px = (*this)[i,j] + a[i,j] ;
+                px = px < 255 ? px : 255;
+                out[i, j] = px > 0 ? px : 0; 
+            }
+        }
+        return out;
     }
 
     SElem::SElem(buint w, buint h){
@@ -409,6 +448,23 @@ namespace Bare{
 
     Img Morph::close0(const Img &in, const  SElem &se){
         return Morph::ero0(Morph::dil0(in,se), se);
+    }
+
+    Img Morph::grad0(Img &a, SElem &se){
+        Img dil = dil0(a, se);
+        Img ero = ero0(a, se);
+
+        return dil - ero;
+    }
+
+    Img Morph::tophat0(Img &a, SElem &se){
+        Img open = open0(a, se);
+        return a - open;
+    }
+
+    Img Morph::blackhat(Img &a, SElem &se){
+        Img close = close0(a, se);
+        return close - a;
     }
 
     void Morph::printImg(Img &img){
