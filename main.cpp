@@ -1,6 +1,6 @@
 #include <iostream>
-#define BARE_MORPH_IMPLEMENTATION
-#include  "baremorph.hpp" 
+#define NAIVE_MORPH_IMPLEMENTATION
+#include  "naivemorph.hpp" 
 
 namespace mm = Naive::Morph;
 

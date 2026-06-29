@@ -1,6 +1,6 @@
 
-#ifndef BARE_MORPH_INCLUDE_H
-#define BARE_MORPH_INCLUDE_H
+#ifndef NAIVE_MORPH_INCLUDE_H
+#define NAIVE_MORPH_INCLUDE_H
 
 #include <cmath>
 #include <cstdint>
@@ -136,9 +136,9 @@ namespace Naive{
 
 }
 
-#endif //BARE_MORPH_INCLUDE_H
+#endif //NAIVE_MORPH_INCLUDE_H
 
-#ifdef BARE_MORPH_IMPLEMENTATION
+#ifdef NAIVE_MORPH_IMPLEMENTATION
 
 #include <iostream>
 #include <algorithm>
