@@ -2,7 +2,7 @@
 #define BARE_MORPH_IMPLEMENTATION
 #include  "baremorph.hpp" 
 
-namespace mm = Bare::Morph;
+namespace mm = Naive::Morph;
 
 int main(void){
 
@@ -20,9 +20,9 @@ int main(void){
     // std::cin >> f;
 
 
-    Bare::Img img = mm::readImg(width, height);
+    Naive::Img img = mm::readImg(width, height);
 
-    Bare::SElem se(3,3);
+    Naive::SElem se(3,3);
     se[0,0] = 1;
     se[0,1] = 1;
     se[0,2] = 1;
@@ -37,7 +37,7 @@ int main(void){
     mm::printSE(se);
     std::cout << "\n";
     // Img r = mm::contrastAndBrightnessAdjust(img, a, b);
-    Bare::Img r = mm::grad0(img, se);
+    Naive::Img r = mm::grad0(img, se);
     mm::printImg(r);
 
     std::cout << "\n";

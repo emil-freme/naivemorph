@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace Bare{
+namespace Naive{
 
     using buint = uint8_t;
     using Img_data =  std::vector<buint>;
@@ -144,7 +144,7 @@ namespace Bare{
 #include <algorithm>
 #include <cassert>
 
-namespace Bare{
+namespace Naive{
 
     Img::Img(buint w, buint h){
 
