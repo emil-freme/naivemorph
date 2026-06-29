@@ -22,8 +22,8 @@ namespace Bare{
 
         buint& operator[](size_t i, size_t j);
         buint operator[](size_t i, size_t j) const;
-        Img operator-(Img &a);//Verificar se precisa ser para os mesmos tamanhos
-        Img operator+(Img &a);
+        Img operator-(const Img &a) const;//Verificar se precisa ser para os mesmos tamanhos
+        Img operator+(const Img &a) const;
     };
 
     class SElem{
@@ -121,11 +121,11 @@ namespace Bare{
 
             Img close0(const Img &in, const  SElem &se);
 
-            Img grad0(Img &a, SElem &Se);
+            Img grad0(const Img &in, const  SElem &se);
 
-            Img tophat0(Img &a, SElem &se);
+            Img tophat0(const Img &in, const  SElem &se);
 
-            Img blackhat(Img &a, SElem &se);
+            Img blackhat(const Img &in, const  SElem &se);
 
 
 
@@ -163,7 +163,7 @@ namespace Bare{
         return data[i * width + j];
     }
 
-    Img Img::operator-(Img &a){
+    Img Img::operator-(const Img &a)  const{
         assert( height == a.height &&
                 width == a.width &&
                 "Imagens devem ser de mesmo tamanho");
@@ -180,7 +180,7 @@ namespace Bare{
         return out;
     }
 
-    Img Img::operator+(Img &a){
+    Img Img::operator+(const Img &a) const{
         assert( height == a.height &&
                 width == a.width &&
                 "Imagens devem ser de mesmo tamanho");
@@ -450,21 +450,16 @@ namespace Bare{
         return Morph::ero0(Morph::dil0(in,se), se);
     }
 
-    Img Morph::grad0(Img &a, SElem &se){
-        Img dil = dil0(a, se);
-        Img ero = ero0(a, se);
-
-        return dil - ero;
+    Img Morph::grad0(const Img &in, const  SElem &se){
+        return dil0(in, se) - ero0(in, se);
     }
 
-    Img Morph::tophat0(Img &a, SElem &se){
-        Img open = open0(a, se);
-        return a - open;
+    Img Morph::tophat0(const Img &in, const  SElem &se){
+        return in - open0(in, se);
     }
 
-    Img Morph::blackhat(Img &a, SElem &se){
-        Img close = close0(a, se);
-        return close - a;
+    Img Morph::blackhat(const Img &in, const  SElem &se){
+        return close0(in, se) - in;
     }
 
     void Morph::printImg(Img &img){
