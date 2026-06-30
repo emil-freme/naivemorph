@@ -23,30 +23,30 @@ int main(void){
     Naive::Img img = mm::readImg(width, height);
 
     Naive::SElem se(3,3);
-    se[0,0] = 1;
-    se[0,1] = 1;
-    se[0,2] = 1;
-    se[1,0] = 1;
-    se[1,1] = 1;
-    se[1,2] = 1;
-    se[2,0] = 1;
-    se[2,1] = 1;
-    se[2,2] = 1;
+    se[0,0] = -1;
+    se[0,1] = -1;
+    se[0,2] = -1;
+    se[1,0] = -1;
+    se[1,1] =  0;
+    se[1,2] = -1;
+    se[2,0] = -1;
+    se[2,1] = -1;
+    se[2,2] = -1;
 
     std::cout << "\n";
     mm::printSE(se);
     std::cout << "\n";
     // Img r = mm::contrastAndBrightnessAdjust(img, a, b);
-    Naive::Img r = mm::grad0(img, se);
-    mm::printImg(r);
+    Naive::SElem r = mm::dist0(img, se);
+    mm::printSE(r);
 
-    std::cout << "\n";
-    r = mm::tophat0(img, se);
-    mm::printImg(r);
-
-    std::cout << "\n";
-    r = mm::blackhat(img, se);
-    mm::printImg(r);
+    // std::cout << "\n";
+    // r = mm::tophat0(img, se);
+    // mm::printImg(r);
+    //
+    // std::cout << "\n";
+    // r = mm::blackhat(img, se);
+    // mm::printImg(r);
 
     return 0;
 }

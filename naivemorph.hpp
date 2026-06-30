@@ -22,7 +22,7 @@ public:
 
   buint &operator[](size_t i, size_t j);
   buint operator[](size_t i, size_t j) const;
-  Img operator-( const Img &a) const; 
+  Img operator-(const Img &a) const;
   Img operator+(const Img &a) const;
 };
 
@@ -77,24 +77,23 @@ Img subsampling(const Img &in, buint f);
 // Uniform Quantization
 Img posterize(const Img &in, buint b);
 
-//TODO
+// TODO
 Img translate(const Img &in, int dx, int dy);
 
-//TODO
+// TODO
 Img rotate(const Img &in, int e);
 
 // TODO: Interpolação
 Img scale(const Img &in, float sx, float sy);
 
-//TODO
+// TODO
 Img shear(const Img &in, float sx, float sy);
 
-//TODO
+// TODO
 Img warpAffine(const Img &in, float a, float b, float tx, float c, float d,
                float ty);
 
-
-//TODO// Definir parametros
+// TODO// Definir parametros
 Img perspective_transform();
 
 // Add Saturação constante
@@ -127,23 +126,22 @@ Img hist(const Img &in, int b);
 // Bitwise and
 Img band(const Img &in, const Img &mask);
 
-//TODO
+// TODO
 Img blur0(const Img &in, int n);
 
-//TODO
+// TODO
 Img lapacian0();
 
-//TODO
+// TODO
 Img sobel0();
 
-//TODO
+// TODO
 Img median0();
 
-//TODO
+// TODO
 Img usm0();
 
-
-//TODO// Usar Limiarização de Otsu
+// TODO// Usar Limiarização de Otsu
 Img threshold(const Img &in);
 // Limiarização binária
 Img threshold(const Img &in, int l);
@@ -219,7 +217,8 @@ Img tophat0(const Img &in, const SElem &se);
 
 Img blackhat(const Img &in, const SElem &se);
 
-Img dist0(const Img &in, const SElem &se);
+// Sim estou abusando do SElem
+SElem dist0(const Img &in, const SElem &se);
 
 void printImg(Img &img);
 void printSE(SElem &se);
@@ -235,6 +234,7 @@ void printSE(SElem &se);
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <limits>
 
 namespace Naive {
 
@@ -517,6 +517,66 @@ Img Morph::tophat0(const Img &in, const SElem &se) {
 
 Img Morph::blackhat(const Img &in, const SElem &se) {
   return close0(in, se) - in;
+}
+
+//Assumindo um se 3x3 TODO: generalizar
+SElem Morph::dist0(const Img &in, const SElem &se) {
+  SElem out(in.width, in.height);
+
+  std::vector<int> neight(5, 0);
+  int maxdist = 1000000000;
+  // Forward (Top-Left -> Bottom-Right)
+  for (int i = 0; i < in.height; i++) {
+    for (int j = 0; j < in.width; j++) {
+
+      if(in[i,j] == 0){//Faz parte do fundo
+        out[i, j] = 0; //Distancia 0 do fundo
+        continue;
+      }
+      else{
+          out[i,j] = maxdist;
+      }
+
+      /*
+      |x (-1, -1)|x(-1, -0)|x (-1, +1)|
+      |x (-1, -0)|o(+0, +0)| |
+      | | | |
+      */
+
+      neight[0] = i-1 < 0 || j-1 < 0 ? maxdist : out[i-1, j-1] - se[0, 0];
+      neight[1] = i-1 < 0 ? maxdist : out[i-1, j] - se[0, 1];
+      neight[2] = i-1 < 0 || j+1 >= in.width ? maxdist : out[i-1, j+1] - se[0, 2];
+      neight[3] = j-1 < 0 ? maxdist : out[i, j-1] - se[1, 0];
+      neight[4] = out[i,j];
+
+      out[i, j] = std::ranges::min(neight);
+    }
+  }
+  //backward (Bottom-Right - Top-Left)
+  for (int i = in.height-1; i > 0; i--) {
+    for (int j = in.width-1; j > 0; j--) {
+
+      if(in[i,j] == 0){//Faz parte do fundo
+        out[i, j] = 0; //Distancia 0 do fundo
+        continue;
+      }
+
+      /*
+      |          |          |           |
+      |          |o (+0, +0)|x (+0, +1) |
+      |x (+1 -1) |x(+1, +0) |x (+1, +1) |
+      */
+
+      neight[0] = i+1 >= in.height || j+1 >= in.width ? maxdist : out[i+1, j+1] - se[2, 2];
+      neight[1] = i+1 >= in.height ? maxdist : out[i+1, j] - se[2, 1];
+      neight[2] = i+1 >= in.height || j-1 < 0 ? maxdist : out[i+1, j-1] - se[2, 0];
+      neight[3] = j+1 >= in.width ? maxdist : out[i, j+1] - se[1, 2];
+      neight[4] = out[i,j];
+
+      out[i, j] = std::ranges::min(neight);
+    }
+  }
+  return out;
 }
 
 void Morph::printImg(Img &img) {
