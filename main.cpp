@@ -23,15 +23,15 @@ int main(void){
     Naive::Img img = mm::readImg(width, height);
 
     Naive::SElem se(3,3);
-    se[0,0] = -1;
-    se[0,1] = -1;
-    se[0,2] = -1;
-    se[1,0] = -1;
+    se[0,0] = -2;
+    se[0,1] = -3;
+    se[0,2] = -3;
+    se[1,0] = -3;
     se[1,1] =  0;
-    se[1,2] = -1;
-    se[2,0] = -1;
-    se[2,1] = -1;
-    se[2,2] = -1;
+    se[1,2] = -3;
+    se[2,0] = -2;
+    se[2,1] = -3;
+    se[2,2] = -2;
 
     std::cout << "\n";
     mm::printSE(se);

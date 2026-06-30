@@ -533,9 +533,6 @@ SElem Morph::dist0(const Img &in, const SElem &se) {
         out[i, j] = 0; //Distancia 0 do fundo
         continue;
       }
-      else{
-          out[i,j] = maxdist;
-      }
 
       /*
       |x (-1, -1)|x(-1, -0)|x (-1, +1)|
@@ -547,7 +544,7 @@ SElem Morph::dist0(const Img &in, const SElem &se) {
       neight[1] = i-1 < 0 ? maxdist : out[i-1, j] - se[0, 1];
       neight[2] = i-1 < 0 || j+1 >= in.width ? maxdist : out[i-1, j+1] - se[0, 2];
       neight[3] = j-1 < 0 ? maxdist : out[i, j-1] - se[1, 0];
-      neight[4] = out[i,j];
+      neight[4] = maxdist;
 
       out[i, j] = std::ranges::min(neight);
     }
